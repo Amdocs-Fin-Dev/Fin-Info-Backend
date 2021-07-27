@@ -1,3 +1,3 @@
 # Fin-Info-Backend
 
-Yahoo Finanze API
+Yahoo Finance API
