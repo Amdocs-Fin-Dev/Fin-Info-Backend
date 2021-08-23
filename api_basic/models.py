@@ -7,3 +7,4 @@ class Ticket(models.Model):
 
     def __str__(self) -> str:
         return self.ticker_id
+

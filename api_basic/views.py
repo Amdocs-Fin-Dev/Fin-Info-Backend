@@ -9,8 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 from django.views import View
 
-
-
 #APiViews
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -76,11 +74,12 @@ class TickerMostrar(APIView):
     #     hist = new_ticker.history(period="1mo")
     #     data = hist.to_json()
     #     return JsonResponse(data, safe=False)
-    def get(self, request, ticker_id, interval):
+    def get(self, request, ticker_id, interval, period):
+        #change here to frontend
         tick = "ALSEA.MX"
         #tick = tickerid
         new_ticker = yf.Ticker(ticker_id)
-        hist = new_ticker.history(period="1y", interval= interval)
+        hist = new_ticker.history(period=period, interval= interval)
         data = hist.to_json()
         return JsonResponse(data, safe=False)
         
