@@ -23,7 +23,16 @@ from os import name, stat
 import json
 from django.http import JsonResponse
 
-
+#Tecnical Analysis
+import pandas as pd
+import ta
+from ta import add_all_ta_features
+from ta.utils import dropna
+from ta.volatility import BollingerBands
+from ta.momentum import RSIIndicator
+from ta.trend import ADXIndicator
+from ta.momentum import StochasticOscillator
+from ta.volatility import AverageTrueRange
 
 class TickerAPIView(APIView):
     
@@ -112,9 +121,38 @@ class TickerMostrarWeek(View):
         hist = new_ticker.history(period="1y",interval=interval)
         data = hist.to_json()
         return JsonResponse(data, safe=False)
+
+#--------------------Tecnichal Analisis ---------------------------------------------------        
+class TecnicalAnalisis(View):
+    def get(self, request, ticker):
+        #Ticker
+        tick = yf.Ticker(ticker)
+        
+        #Download data and reset index
+        df = tick.history(period="2mo").reset_index()[[ "Date", "Open","High","Low","Close", "Volume" ]]
+        
+        #RSI
+        df["rsi"] = RSIIndicator(df["Close"], window=14).rsi()
+        
+        #ADX Indicator
+        adx = ADXIndicator(df["High"], df["Low"], df["Close"], window=14)
+        df["adx"] = adx.adx() 
+
+        #Stochastic Oscillator
+        df["stOscillator"] = StochasticOscillator(df["High"], df["Low"], df["Close"], window=14).stoch()
+        
+        #Average True Range
+        df["AvgTrueRange"] = AverageTrueRange(df["High"], df["Low"], df["Close"]).average_true_range()
+
+        #Grab the last row from Data Frame
+        last = df.iloc[-1]
+        
+        #Convert Pandas Data Frame in JSON format
+        data = last.to_json()
+
+        return JsonResponse(data, safe=False)
         
 
-# Create your views here.
 #@csrf_exempt
 @api_view(['GET', 'POST', 'DELETE'])
 def ticker_list(request, ticker_id): 
@@ -126,3 +164,4 @@ def ticker_list(request, ticker_id):
         data = historical.to_json()
         
         return Response(data)
+
