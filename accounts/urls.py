@@ -1,3 +1,4 @@
+
 from django.urls import path
 from .views import account_list, account_detail, portfolio_detail, portfolio_list, portifolio_add
 urlpatterns = [
@@ -8,4 +9,5 @@ urlpatterns = [
     path('newportfolio/<str:email>/',portfolio_detail),  #no funciona
     path('addfavorites/',portifolio_add),
     path('portfolio/<str:email>/<str:ticker>/',portfolio_list),
+    
 ]
