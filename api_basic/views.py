@@ -3,11 +3,12 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.functional import new_method_proxy
 from rest_framework import serializers
 from rest_framework.parsers import JSONParser
-from .models import Ticket
-from .serializers import TickerSerializer
+from .models import Ticket, Mex_stocks
+from .serializers import TickerSerializer, Mex_stocks_Serializer
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 from django.views import View
+from django.db import connection
 
 #APiViews
 from rest_framework.views import APIView
@@ -165,3 +166,12 @@ def ticker_list(request, ticker_id):
         
         return Response(data)
 
+def stock_list(request,patterMatch = " " ):
+    # if request.method == 'GET':
+    stocks =  Mex_stocks.objects.all() 
+    serializer = Mex_stocks_Serializer(stocks, many=True)
+    with connection.cursor() as cursor:
+      cursor.execute("SELECT * FROM api_basic_mex_stocks WHERE id_name LIKE %s ", [patterMatch + "%"])
+    
+      row = cursor.fetchall()
+      return JsonResponse(row,safe=False)
