@@ -10,4 +10,5 @@ urlpatterns = [
     path('addfavorites/',portifolio_add),
     path('portfolio/<str:email>/<str:ticker>/',portfolio_list),
     
+    
 ]
