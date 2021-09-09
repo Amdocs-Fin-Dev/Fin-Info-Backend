@@ -10,7 +10,7 @@ urlpatterns = [
     path('mostrar/w', TickerMostrar.as_view()),
     path('line/w', TickerMostrarWeek.as_view()),
     path('line/m', TickerMostrarMonth.as_view()),
-    path('analisis/<str:ticker>',TecnicalAnalisis.as_view()),
+    path('analisis/<str:ticker>/<str:flag>',TecnicalAnalisis.as_view()),
     path('search/<str:patterMatch>', stock_list)
 ]
 
