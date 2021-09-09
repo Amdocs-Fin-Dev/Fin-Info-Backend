@@ -125,7 +125,7 @@ class TickerMostrarWeek(View):
 
 #--------------------Tecnichal Analisis ---------------------------------------------------        
 class TecnicalAnalisis(View):
-    def get(self, request, ticker):
+    def get(self, request, ticker, flag="0"):
         #Ticker
         tick = yf.Ticker(ticker)
         
@@ -149,7 +149,10 @@ class TecnicalAnalisis(View):
         last = df.iloc[-1]
         
         #Convert Pandas Data Frame in JSON format
-        data = last.to_json()
+        if flag == "1":   
+            data = last.to_json()
+        else:
+            data = df.to_json() 
 
         return JsonResponse(data, safe=False)
         
@@ -171,7 +174,7 @@ def stock_list(request,patterMatch = " " ):
     stocks =  Mex_stocks.objects.all() 
     serializer = Mex_stocks_Serializer(stocks, many=True)
     with connection.cursor() as cursor:
-      cursor.execute("SELECT * FROM api_basic_mex_stocks WHERE id_name LIKE %s ", [patterMatch + "%"])
+      cursor.execute("SELECT id_name FROM api_basic_mex_stocks WHERE id_name LIKE %s ", [patterMatch + "%"])
     
       row = cursor.fetchall()
       return JsonResponse(row,safe=False)
