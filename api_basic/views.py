@@ -1,6 +1,8 @@
+from enum import Flag
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.utils.functional import new_method_proxy
+from numpy import inner
 from rest_framework import serializers
 from rest_framework.parsers import JSONParser
 from .models import Ticket, Mex_stocks
@@ -155,7 +157,63 @@ class TecnicalAnalisis(View):
             data = df.to_json() 
 
         return JsonResponse(data, safe=False)
+
+#-------------------------------------------------------------------------------------------------
+class Comodities(View):
+    def get(self, request):
+        #Gold, Natural Gas, Silver, Crude Oil, Cocoa v 
+        # NG SI CL=F CC=F
+        data = yf.download("GC=F NG CL=F CC=F SI", period="1mo",
+        group_by="ticker", actions=False, threads=True, rounding=True)
+        # new = data.reset_index()[[ "Date", "Open","High","Low","Close", "Volume" ]]
         
+        # Separo los datos
+        close = data['NG']['Close']
+        closeGC = data['GC=F']['Close']
+        closeCL = data['CL=F']['Close']
+        closeCC = data['CC=F']['Close']
+        closeSI = data['SI']['Close']
+
+        #nani = close.append(close2)
+        
+        # reseteo los indices de los 2 tickers
+        new = close.reset_index()[["Date","Close"]]
+        # print(new)
+        new1 = closeGC.reset_index()[["Close"]]
+        new2 = closeCL.reset_index()[["Close"]]
+        new3 = closeCC.reset_index()[["Close"]]
+        new4 = closeSI.reset_index()[["Close"]]
+        
+
+        # Les cambio los nombres de Close a Tickername
+        new = new.rename(columns={"Close": "NG"})
+        # print(new)
+        new1 = new1.rename(columns={"Close": "GC"})
+        new2 = new2.rename(columns={"Close": "CL"})
+        new3 = new3.rename(columns={"Close": "CC"})
+        new4 = new4.rename(columns={"Close": "SI"})
+        # print(new1)
+        # append data
+        datos = pd.concat([new, new1,new2,new3,new4], axis=1)
+        print(datos)
+        
+        # data = data.iloc[-1].to_json()
+        neww = datos.to_json()
+        return JsonResponse(neww, safe=False)
+        
+
+class ComoditiesList(View):
+    def get(self, request):
+        #Gold, Natural Gas, Silver, Crude Oil, Cocoa v 
+        # NG SI CL=F CC=F
+        data = yf.download("GC=F NG", period="1mo",
+        group_by="ticker", actions=False, threads=True, rounding=True)
+        # new = data.reset_index()[[ "Date", "Open","High","Low","Close", "Volume" ]]
+        print(data['NG']['Close'])
+        # data = data.iloc[-1].to_json()
+
+        return JsonResponse(data, safe=False)
+
 
 #@csrf_exempt
 @api_view(['GET', 'POST', 'DELETE'])
