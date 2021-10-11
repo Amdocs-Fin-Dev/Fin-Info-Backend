@@ -178,7 +178,6 @@ class Comodities(View):
         
         # reseteo los indices de los 2 tickers
         new = close.reset_index()[["Date","Close"]]
-        # print(new)
         new1 = closeGC.reset_index()[["Close"]]
         new2 = closeCL.reset_index()[["Close"]]
         new3 = closeCC.reset_index()[["Close"]]
@@ -187,7 +186,6 @@ class Comodities(View):
 
         # Les cambio los nombres de Close a Tickername
         new = new.rename(columns={"Close": "NG"})
-        # print(new)
         new1 = new1.rename(columns={"Close": "GC"})
         new2 = new2.rename(columns={"Close": "CL"})
         new3 = new3.rename(columns={"Close": "CC"})
