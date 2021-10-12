@@ -37,6 +37,10 @@ from ta.trend import ADXIndicator
 from ta.momentum import StochasticOscillator
 from ta.volatility import AverageTrueRange
 
+import newsapi
+from newsapi.newsapi_client import NewsApiClient
+import requests
+
 class TickerAPIView(APIView):
     
     def get(self, request):
@@ -192,8 +196,8 @@ class Comodities(View):
         new4 = new4.rename(columns={"Close": "SI"})
         # print(new1)
         # append data
-        datos = pd.concat([new, new1,new2,new3,new4], axis=1)
-        print(datos)
+        datos = pd.concat([new,new1,new2,new3,new4], axis=1)
+        # print(datos)
         
         # data = data.iloc[-1].to_json()
         neww = datos.to_json()
@@ -211,6 +215,27 @@ class ComoditiesList(View):
         # data = data.iloc[-1].to_json()
 
         return JsonResponse(data, safe=False)
+
+class NewsList(View):
+    def get(self, request):
+
+        query_params = {
+            "source": "the-verge",
+            "sortBy": "top",
+            "apiKey": "b2e4276e155d4b3e8c7786b250158584"
+            }
+        main_url = " https://newsapi.org/v1/articles"
+
+        #Fetching data in json format
+        #Obtenemos el status
+        res = requests.get(main_url, params=query_params)
+        #Obtenemos toda la salida del query en Json format NO FILTRADO
+        open_bbc_page = res.json()
+        # getting all articles in a string article
+        article = open_bbc_page["articles"]
+
+        return JsonResponse(article, safe=False)
+     
 
 
 #@csrf_exempt
