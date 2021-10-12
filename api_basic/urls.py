@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Comodities, stock_list, ticker_list, TickerAPIView, TickerDetails, TickerMostrar, TickerMostrarMonth,TickerMostrarWeek,TecnicalAnalisis
+from .views import Comodities, NewsList, stock_list, ticker_list, TickerAPIView, TickerDetails, TickerMostrar, TickerMostrarMonth,TickerMostrarWeek,TecnicalAnalisis
 #from .views import TickerAPIView, TickerDetails, TickerMostrar
 urlpatterns = [
     path('show/<str:ticker_id>', ticker_list), 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('analisis/<str:ticker>/<str:flag>',TecnicalAnalisis.as_view()),
     path('search/<str:patterMatch>', stock_list),
     path('comodities/',Comodities.as_view()),
+    path('news/',NewsList.as_view()),
 ]
 
 
