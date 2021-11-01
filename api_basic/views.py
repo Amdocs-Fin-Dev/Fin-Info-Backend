@@ -37,9 +37,11 @@ from ta.trend import ADXIndicator
 from ta.momentum import StochasticOscillator
 from ta.volatility import AverageTrueRange
 
+#News Section
 import newsapi
 from newsapi.newsapi_client import NewsApiClient
 import requests
+import random
 
 class TickerAPIView(APIView):
     
@@ -96,6 +98,17 @@ class TickerMostrar(APIView):
         #tick = tickerid
         new_ticker = yf.Ticker(ticker_id)
         hist = new_ticker.history(period=period, interval= interval)
+        # some = hist.replace[-1]['Close'] = 999
+        # some = hist.replace(0,999.9)
+        # print("New pandas",some)
+        # print("New pandas2",some.iloc[0]['Close'])
+        # number = random.randrange(150,160, 1)
+        # hist.iloc[-1, hist.columns.get_loc('Close')] = number
+        # hist.iloc[-2, hist.columns.get_loc('Close')] =  random.randrange(140,160, 1)
+        # hist.iloc[-3, hist.columns.get_loc('Close')] =  random.randrange(140,160, 1)
+        # hist.iloc[-4, hist.columns.get_loc('Close')] =  random.randrange(140,160, 1)
+        # hist.iloc[-5, hist.columns.get_loc('Close')] =  random.randrange(140,160, 1)
+        # print(hist.iloc[-1])
         data = hist.to_json()
         return JsonResponse(data, safe=False)
         
@@ -197,7 +210,7 @@ class Comodities(View):
         # print(new1)
         # append data
         datos = pd.concat([new,new1,new2,new3,new4], axis=1)
-        # print(datos)
+        print(datos)
         
         # data = data.iloc[-1].to_json()
         neww = datos.to_json()
@@ -216,7 +229,7 @@ class ComoditiesList(View):
 
         return JsonResponse(data, safe=False)
 
-class NewsList(View):
+class NewsList(APIView):
     def get(self, request):
 
         query_params = {
@@ -224,7 +237,7 @@ class NewsList(View):
             "sortBy": "top",
             "apiKey": "b2e4276e155d4b3e8c7786b250158584"
             }
-        main_url = " https://newsapi.org/v1/articles"
+        main_url = "https://newsapi.org/v2/top-headlines?country=us&category=business"
 
         #Fetching data in json format
         #Obtenemos el status

@@ -5,8 +5,8 @@ from django.views.decorators import csrf
 from rest_framework import serializers
 from rest_framework.parsers import JSONParser
 from yfinance import ticker 
-from .models import Account, Portfolio, PortfolioManager
-from .serializers import AccountSerializer, PortfolioSerializer
+from .models import Account, Invest, Portfolio, PortfolioManager
+from .serializers import AccountSerializer, InvestSerializer, PortfolioSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 
@@ -99,6 +99,7 @@ def portfolio_detail(request, email, ticker):
     if request.method == 'GET':
         # many is for multiple data
         serializer = PortfolioSerializer(portfolio)
+        print("Mis datos del portfolio",serializer.data)
         return JsonResponse(serializer.data, safe=False, many=True)
 
     elif request.method == 'PUT':
@@ -130,4 +131,35 @@ def portifolio_add(request):
         return JsonResponse(serializer.errors, status=400)
     # elif request.method == 'DELETE':
 
-    
+@csrf_exempt
+def invest_add(request):
+    if request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = InvestSerializer(data = data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status = 201)
+
+        return JsonResponse(serializer.errors, status= 400)
+
+
+# @csrf_exempt
+# def invest_list(request, email):
+#     # if request.method == 'GET':
+#         #email ="kurohime@gmail.com"
+#         #aqui iba
+#     invests = Invest.objects.get_queryset(email)
+#     print("Mis inversiones :3",invests)
+#     serializer = InvestSerializer(invests, many=True)
+#     return JsonResponse(serializer.data, safe=False)
+
+
+@csrf_exempt
+def invest_list(request, email):
+    if request.method == 'GET':
+        invests = Invest.objects.get_queryset(email)
+        print("Mis inversiones :3",invests)
+        serializer = InvestSerializer(invests, many=True)
+        return JsonResponse(serializer.data, safe=False)
+

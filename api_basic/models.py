@@ -14,3 +14,4 @@ class Mex_stocks(models.Model):
     
     def __str__(self):
         return self.id_name
+
