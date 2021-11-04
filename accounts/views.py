@@ -2,6 +2,9 @@ import json
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators import csrf
+from numpy.lib.index_tricks import AxisConcatenator
+import pandas as pd
+from requests.sessions import merge_cookies
 from rest_framework import serializers
 from rest_framework.parsers import JSONParser
 from yfinance import ticker 
@@ -10,7 +13,14 @@ from .serializers import AccountSerializer, InvestSerializer, PortfolioSerialize
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 
+
+import yfinance as yf
+import pandas_datareader as pdr
+from yfinance import ticker
+from datetime import datetime
+import numpy as np
 # Create your views here.
+from IPython.display import display
 
 @csrf_exempt
 def account_list(request):
@@ -156,10 +166,117 @@ def invest_add(request):
 
 
 @csrf_exempt
-def invest_list(request, email):
+def invest_list(request, email, tickerTrade):
     if request.method == 'GET':
-        invests = Invest.objects.get_queryset(email)
-        print("Mis inversiones :3",invests)
+        #Ticker
+        tick = yf.Ticker(tickerTrade)
+        
+        #Download data and reset index
+        df = tick.history(period="2mo").reset_index()[["Date", "Open","High","Low","Close", "Volume" ]]
+        # print("some plis")
+        react = df['Close']
+        # df['New'] = 0
+        df = df.assign(Percentage = df['Close'] - df['Close'].iloc[-1])
+        # df = df.assign(Percentage = 0)
+
+        # print(df)
+
+        col = df["Close"]
+        data = list(col)
+        diff = []
+        # print("Rango de data: ", len(data))
+        for i in range(len(data)):
+            if i == 0:
+                diff.append(0)
+            elif i + 1 < len(data):
+                some = ((data[i] - data[i + 1]) * 100)/data[i]
+                diff.append(some)
+                # print(i , some)
+            else:
+                some = ((data[i] - data[i - 1]) * 100)/data[i]
+                diff.append(some)
+        # print(diff)
+        df = df.assign(Nani= diff)
+        
+
+        # print(df)
+        invests = Invest.objects.get_queryset(email, tickerTrade)
+        # print("Mis inversiones :3",invests)
+        
         serializer = InvestSerializer(invests, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        # df = df.assign(Invests = serializer.data)
+
+        pandita = pd.DataFrame(serializer.data)
+
+        # print(pandita)
+        
+        #cambiamos el nombre a Date para poder hacer merge 
+        pandita = pandita.rename(columns={"dateInvest": "Date"})
+
+        # al dataframe que jalamos, le ponemos el formato de datetime64
+        pandita["Date"] = pd.to_datetime(pandita["Date"])
+        
+        # print("Pandita", pandita["Date"])
+        
+        # print("Panda", df["Date"])
+
+        # Cambiar la columna de Yahoo para hacer el merge con el otro dataframe
+        # df = df.rename(columns={"Date":"dateInvest"})
+        # df["Date"] = pd.to_datetime(df["Date"])
+        # print(df)
+        
+        # df = df.assign(amount=0)
+        # print(df)
+
+        df.set_index('Date',inplace=True)
+        pandita.set_index('Date',inplace=True)
+
+        # df = df.add(pandita)
+        
+        # print(df)
+        # print(pandita)
+
+        # df = df.merge(pandita[["amount"]])
+        # df = df.sum(pandita[["amount"]])
+        # pandita = pandita.merge(df[["Date","amount"]])
+        pandita2 = pd.concat([df, pandita],axis=1)
+
+        # print(pandita)
+        # df = pd.concat([df, pandita], axis=0)
+
+        # print(pandita2)
+        meruko = pandita2[['Close','Nani', 'amount']].copy()
+        meruko = pandita2[['Close','Nani', 'amount']].fillna(0)
+
+        meruko = meruko.assign(final=0)
+
+        print(meruko)
+
+        # print(meruko)
+        # meruko["amount"].fillna(0)
+        porcentaje = meruko["Nani"]
+        monto = meruko["amount"]
+        final = meruko["final"]
+        dataPorcentaje = list(porcentaje)
+        dataMonto = list(monto)
+        ganancias = list(final)
+        for i in range(len(meruko)):
+            if dataMonto[i] > 0:
+                # i - 1
+                for j in range(i, len(meruko)):
+                    temp = (dataMonto[i] * dataPorcentaje[j])/100 
+                    ganancias[j] = ganancias[j] + temp
+
+        meruko["final"] = ganancias
+
+        # print("Len de Meruko", len(meruko))
+        # for i in range(len(ganancias)):
+
+        #     print(i,ganancias[i])
+
+        print(meruko)
+
+        data = meruko.to_json()
+ 
+        return JsonResponse(data, safe=False)
 

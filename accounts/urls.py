@@ -10,7 +10,7 @@ urlpatterns = [
     path('addfavorites/',portifolio_add),
     path('portfolio/<str:email>/<str:ticker>/',portfolio_list),
     path('invest/',invest_add),
-    path('invest/<str:email>/',invest_list),
+    path('invest/<str:email>/<str:tickerTrade>/',invest_list),
     
     
 ]

@@ -39,8 +39,8 @@ class Portfolio(models.Model):
 
 
 class InvestManager(models.Manager):
-    def get_queryset(self, email=''):
-        return super(InvestManager,self).get_queryset().filter(email=email)
+    def get_queryset(self, email='', tickerTrade = ''):
+        return super(InvestManager,self).get_queryset().filter(email=email, tickerTrade=tickerTrade)
 
     def create(self,**kwargs):
         return super().create(**kwargs)
