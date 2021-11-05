@@ -265,7 +265,7 @@ def invest_list(request, email, tickerTrade):
                 # i - 1
                 for j in range(i, len(meruko)):
                     temp = (dataMonto[i] * dataPorcentaje[j])/100 
-                    ganancias[j] = ganancias[j] + temp
+                    ganancias[j] = ganancias[j] + temp + dataMonto[i]
 
         meruko["final"] = ganancias
 
@@ -274,9 +274,12 @@ def invest_list(request, email, tickerTrade):
 
         #     print(i,ganancias[i])
 
-        print(meruko)
+        # print(meruko)
+        data = meruko.reset_index()[["Date", "Close","Nani","amount","final"]]
 
-        data = meruko.to_json()
+        print(data)
+
+        data = data.to_json()
  
         return JsonResponse(data, safe=False)
 
